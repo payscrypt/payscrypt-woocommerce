@@ -73,7 +73,7 @@ class Payscrypt_API_Handler
         $args = array(
             "merchant_order_id" => $order_id . "", // string
             "description" => $description, // string
-            "coin_name" => $currency, // string
+            "asset_name" => $currency, // string
             "target_value" => bcmul($amount . "", "1000000000000000000", 0), // string
             "callback_url" => $redirect, // string
             "pg_wallet_id" => self::$pg_wallet_id // int
