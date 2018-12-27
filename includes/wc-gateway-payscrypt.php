@@ -204,7 +204,7 @@ class WC_Gateway_Payscrypt extends WC_Payment_Gateway
             $pg_order_id = $data["id"]; // string
             $order_id = $data["merchant_order_id"];  // string
 
-            // 收到webhook之后，查询最新的order信息、更新到数据库
+            // Double check
             $args = array(
                 "id" => $pg_order_id, // string
                 "with_payments" => false
@@ -239,14 +239,13 @@ class WC_Gateway_Payscrypt extends WC_Payment_Gateway
      */
     public function _update_order_status($order, $new_status)
     {
-        // TODO: 更新meta_data 这个有没有意义？
+        // TODO: not sure what this does 
         $order->update_meta_data('_payscrypt_status', $new_status);
 
         self::log("status 1: " . print_r($order->get_status(), true));
 
         // TODO:
-        // 这里的status可能不是完全对应得上WC的订单状态，暂时先这样。
-        // 如果后续有需要再注册新的状态。
+        // Need a review on status matching between Woocommerce and Payscrypt
         if ("PENDING" === $new_status) {
             $order->update_status('pending', __('Payscrypt payment pending.', 'payscrypt'));
         } elseif ("CONFIRMING" === $new_status) {
@@ -302,7 +301,7 @@ class WC_Gateway_Payscrypt extends WC_Payment_Gateway
                 'key' => '_payscrypt_archived',
                 'compare' => $query_vars['payscrypt_archived'] ? 'EXISTS' : 'NOT EXISTS',
             );
-            // Limit only to orders payed through Coinbase.
+            // Limit only to orders payed through Payscrypt.
             $query['meta_query'][] = array(
                 'key' => '_payscrypt_charge_id',
                 'compare' => 'EXISTS',

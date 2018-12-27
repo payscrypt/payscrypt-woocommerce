@@ -2,7 +2,7 @@
 
 Woocommerce payment plugin for the safest cryptocurrency payment gateway **Payscrypt**
 
-## Why Payscrypt is the Safest Cryptocurrenct Payment Gateway
+## Why Payscrypt is the Safest Cryptocurrency Payment Gateway
 
 Because Payscrypt only needs the public key. [Check it out](https://payscrypt.com)
 

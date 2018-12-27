@@ -134,14 +134,14 @@ class Payscrypt_API_Handler
         } else {
             $code = $response['response']['code'];
 
-            // 成功状态码200
+            // Success
             if ($code == 200) {
                 self::log("create_order response body: " . print_r($response["body"], true));
 
                 $result = json_decode($response['body'], true);
                 return array(true, $result);
             } else {
-                // 失败状态码有400、401、404，系统返回的报错信息都在header里面，暂时不处理
+                // Error info is in the headers
                 self::log('create_order error, response code: ' . $code, "error");
 
                 return array(false, $code);
@@ -179,14 +179,14 @@ class Payscrypt_API_Handler
         } else {
             $code = $response['response']['code'];
 
-            // 查询成功状态码200
+            // Success
             if ($code == 200) {
                 self::log("get_order response body: " . print_r($response["body"], true));
 
                 $result = json_decode($response['body'], true);
                 return array(true, $result);
             } else {
-                // 查询失败状态码404
+                // 404 not found
                 self::log('get_order error, response code: ' . $code);
 
                 return array(false, $code);
