@@ -74,24 +74,20 @@ class Payscrypt_API_Handler
             return array(false, 'Missing currency.');
         }
 
-        if ($currency == "ETH") {
-            $args = array(
-                "merchant_order_id" => $order_id . "", // string
-                "description" => $description, // string
-                "asset_name" => $currency, // string
-                "target_value" => bcmul($amount . "", "1000000000000000000", 0), // string
-                "callback_url" => $redirect, // string
-                "pg_wallet_id" => self::$pg_wallet_id // int
-            );
+        $args = array(
+            "merchant_order_id" => $order_id . "", // string
+            "description" => $description, // string
+            "asset_name" => $currency, // string
+            "callback_url" => $redirect, // string
+            "pg_wallet_id" => self::$pg_wallet_id // int
+        );
+
+        if ($currency == "LCCN") {
+            $args["target_value"] = bcmul($amount . "", "1000000000000000000", 0); // string
+        } elseif ($currency == "ETH") {
+            $args["target_value"] = bcmul($amount . "", "1000000000000000000", 0); // string
         } elseif ($currency == "BTC") {
-            $args = array(
-                "merchant_order_id" => $order_id . "", // string
-                "description" => $description, // string
-                "asset_name" => $currency, // string
-                "target_value" => bcmul($amount . "", "100000000", 0), // string
-                "callback_url" => $redirect, // string
-                "pg_wallet_id" => self::$pg_wallet_id // int
-            );
+            $args["target_value"] = bcmul($amount . "", "100000000", 0); // string
         } else {
             return array(false, "Unsupport currency.");
         }
