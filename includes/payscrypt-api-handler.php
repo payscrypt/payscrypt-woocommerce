@@ -25,14 +25,19 @@ class Payscrypt_API_Handler
     }
 
     /**
+     * @var string Payscrypt API Endpoint
+     */
+    public static $api_endpoint;
+
+    /**
      * @var string Payscrypt Create Order API url
      */
-    public static $create_order_api_url = "https://dev.payscrypt.com/apis/pg/create_order";
+    public static $create_order_api_url = "/apis/pg/create_order";
 
     /**
      * @var string Payscrypt Get Order API url
      */
-    public static $get_order_api_url = "https://dev.payscrypt.com/apis/pg/get_public_order";
+    public static $get_order_api_url = "/apis/pg/get_public_order";
 
     /**
      * @var string Payscrypt API key.
@@ -96,7 +101,7 @@ class Payscrypt_API_Handler
      */
     public static function create_order($params = array(), $method = 'POST')
     {
-        $url = self::$create_order_api_url;
+        $url = self::$api_endpoint . self::$create_order_api_url;
 
         $args = array(
             'method' => $method,
@@ -149,7 +154,7 @@ class Payscrypt_API_Handler
             )
         );
 
-        $url = self::$get_order_api_url;
+        $url = self::$api_endpoint . self::$get_order_api_url;
 
         $args['body'] = json_encode($params);
 
