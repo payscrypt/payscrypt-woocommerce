@@ -77,6 +77,12 @@ class WC_Gateway_Payscrypt extends WC_Payment_Gateway
                 'description' => __('This controls the description which the user sees during checkout.', 'woocommerce'),
                 'default' => __('Pay with Bitcoin or other cryptocurrencies.', 'payscrypt'),
             ),
+            "merchant_name" => array(
+                "title" => _("Merchant Name", "payscrypt"),
+                "type" => "text",
+                "default" => "",
+                'description' => sprintf(__('Merchant Name', 'payscrypt')),
+            ),
             "api_endpoint" => array(
                 "title" => _("API Endpoint", "payscrypt"),
                 "type" => "text",
@@ -187,6 +193,7 @@ class WC_Gateway_Payscrypt extends WC_Payment_Gateway
         Payscrypt_API_Handler::$api_endpoint = $this->get_option('api_endpoint');
         Payscrypt_API_Handler::$api_key = $this->get_option('api_key');
         Payscrypt_API_Handler::$pg_wallet_id = $this->get_option("pg_wallet_id");
+        Payscrypt_API_Handler::$merchant_name = $this->get_option('merchant_name');
     }
 
 

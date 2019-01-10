@@ -50,6 +50,11 @@ class Payscrypt_API_Handler
     public static $pg_wallet_id;
 
     /**
+     * @var string $merchant_name
+     */
+    public static $merchant_name;
+
+    /**
      * Create a new charge request.
      *
      * @param int $order_id
@@ -76,6 +81,7 @@ class Payscrypt_API_Handler
 
         $args = array(
             "merchant_order_id" => $order_id . "", // string
+            "merchant_name" => self::$merchant_name,
             "description" => $description, // string
             "asset_name" => $currency, // string
             "callback_url" => $redirect, // string
