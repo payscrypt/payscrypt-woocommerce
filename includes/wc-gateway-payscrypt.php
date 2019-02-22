@@ -77,12 +77,6 @@ class WC_Gateway_Payscrypt extends WC_Payment_Gateway
                 'description' => __('This controls the description which the user sees during checkout.', 'woocommerce'),
                 'default' => __('Pay with Bitcoin or other cryptocurrencies.', 'payscrypt'),
             ),
-            "merchant_name" => array(
-                "title" => _("Merchant Name", "payscrypt"),
-                "type" => "text",
-                "default" => "",
-                'description' => sprintf(__('Merchant Name', 'payscrypt')),
-            ),
             "api_endpoint" => array(
                 "title" => _("API Endpoint", "payscrypt"),
                 "type" => "text",
@@ -170,7 +164,7 @@ class WC_Gateway_Payscrypt extends WC_Payment_Gateway
             return array('result' => 'fail');
         }
 
-        $charge = $result[1]['order'];
+        $charge = $result[1]['invoice'];
 
         $order->update_meta_data('_payscrypt_charge_id', $charge['code']);
         $order->save();
@@ -192,8 +186,7 @@ class WC_Gateway_Payscrypt extends WC_Payment_Gateway
         Payscrypt_API_Handler::$log = get_class($this) . '::log';
         Payscrypt_API_Handler::$api_endpoint = $this->get_option('api_endpoint');
         Payscrypt_API_Handler::$api_key = $this->get_option('api_key');
-        Payscrypt_API_Handler::$pg_wallet_id = $this->get_option("pg_wallet_id");
-        Payscrypt_API_Handler::$merchant_name = $this->get_option('merchant_name');
+        Payscrypt_API_Handler::$wallet_id = $this->get_option("pg_wallet_id");
     }
 
 
@@ -208,23 +201,23 @@ class WC_Gateway_Payscrypt extends WC_Payment_Gateway
 
             self::log('Webhook received: ' . print_r($data, true));
 
-            $pg_order_id = $data["id"]; // string
+            $payscrpyt_invoice_id = $data["id"]; // string
             $order_id = $data["merchant_order_id"];  // string
 
             // Double check
             $args = array(
-                "id" => $pg_order_id, // string
+                "id" => $payscrpyt_invoice_id, // string
                 "with_payments" => false
             );
 
             $this->init_api();
 
-            $result = Payscrypt_API_Handler::get_order($args);
+            $result = Payscrypt_API_Handler::get_invoice($args);
 
-            self::log("handle_webhook get response from get_order: " . print_r($result, true));
+            self::log("handle_webhook get response from get_invoice: " . print_r($result, true));
 
             if (!$result[0]) {
-                self::log('Payscrypt can not find order, pg_order_id: ' . $pg_order_id);
+                self::log('Payscrypt can not find order, payscrpyt_invoice_id: ' . $payscrpyt_invoice_id);
             }
 
             $new_status = $result[1]["order"]["status"];

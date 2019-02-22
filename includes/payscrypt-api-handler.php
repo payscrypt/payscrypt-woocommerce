@@ -30,14 +30,14 @@ class Payscrypt_API_Handler
     public static $api_endpoint;
 
     /**
-     * @var string Payscrypt Create Order API url
+     * @var string Payscrypt Create Invoice API url
      */
-    public static $create_order_api_url = "/apis/pg/create_order";
+    public static $create_invoice_api_url = "/payment/v1/invoice";
 
     /**
-     * @var string Payscrypt Get Order API url
+     * @var string Payscrypt Get Invoice API url
      */
-    public static $get_order_api_url = "/apis/pg/get_public_order";
+    public static $get_invoice_api_url = "/payment/v1/invoice/{id}";
 
     /**
      * @var string Payscrypt API key.
@@ -45,60 +45,55 @@ class Payscrypt_API_Handler
     public static $api_key;
 
     /**
-     * @var string $pg_wallet_id
+     * @var string $wallet_id
      */
-    public static $pg_wallet_id;
-
-    /**
-     * @var string $merchant_name
-     */
-    public static $merchant_name;
+    public static $wallet_id;
 
     /**
      * Create a new charge request.
      *
-     * @param int $order_id
+     * @param int $invoice_id
      * @param string $description
-     * @param  int $amount
-     * @param  string $currency
+     * @param  int $price
+     * @param  string $asset
      * @param  string $redirect
      * @return array
      */
-    public static function create_charge($order_id = null, $description = null, $amount = null, $currency = null, $redirect = null)
+    public static function create_charge($invoice_id = null, $description = null, $price = null, $asset = null, $redirect = null)
     {
-        if (is_null($order_id)) {
-            self::log('Error: missing order_id.', 'error');
-            return array(false, 'Missing order_id.');
+        if (is_null($invoice_id)) {
+            self::log('Error: missing invoice_id.', 'error');
+            return array(false, 'Missing invoice_id.');
         }
-        if (is_null($amount)) {
-            self::log('Error: missing amount.', 'error');
-            return array(false, 'Missing amount.');
+        if (is_null($price)) {
+            self::log('Error: missing price.', 'error');
+            return array(false, 'Missing price.');
         }
-        if (is_null($currency)) {
-            self::log('Error: missing currency.', 'error');
-            return array(false, 'Missing currency.');
+        if (is_null($asset)) {
+            self::log('Error: missing asset.', 'error');
+            return array(false, 'Missing asset.');
         }
 
         $args = array(
-            "merchant_order_id" => $order_id . "", // string
-            "merchant_name" => self::$merchant_name,
-            "description" => $description, // string
-            "asset_name" => $currency, // string
-            "callback_url" => $redirect, // string
-            "pg_wallet_id" => self::$pg_wallet_id // int
+            "merchant_invoice_id" => $invoice_id . "", // merchant_invoice_id: string
+            "wallet_id" => self::$wallet_id, // wallet_id: int
+            "callback_url" => $redirect, // callback_url: string
+            "description" => $description, // description: string
+            "asset" => $asset // asset: string
         );
 
-        if ($currency == "LCCN") {
-            $args["target_value"] = bcmul($amount . "", "1000000000000000000", 0); // string
-        } elseif ($currency == "ETH") {
-            $args["target_value"] = bcmul($amount . "", "1000000000000000000", 0); // string
-        } elseif ($currency == "BTC") {
-            $args["target_value"] = bcmul($amount . "", "100000000", 0); // string
+        // $asset: string
+        if ($asset == "LCCN") {
+            $args["price"] = bcmul($price . "", "1000000000000000000", 0); // string
+        } elseif ($asset == "ETH") {
+            $args["price"] = bcmul($price . "", "1000000000000000000", 0); // string
+        } elseif ($asset == "BTC") {
+            $args["price"] = bcmul($price . "", "100000000", 0); // string
         } else {
-            return array(false, "Unsupport currency.");
+            return array(false, "Unsupport asset.");
         }
 
-        $result = self::create_order($args, 'POST');
+        $result = self::create_invoice($args, 'POST');
 
         self::log("create_charge get response from create_order: " . print_r($result, true));
 
@@ -107,15 +102,15 @@ class Payscrypt_API_Handler
 
 
     /**
-     * Create Order in Payscrypt
+     * Create Invoice in Payscrypt
      *
      * @param  array $params
      * @param  string $method
      * @return array
      */
-    public static function create_order($params = array(), $method = 'POST')
+    public static function create_invoice($params = array(), $method = 'POST')
     {
-        $url = self::$api_endpoint . self::$create_order_api_url;
+        $url = self::$api_endpoint . self::$create_invoice_api_url;
 
         $args = array(
             'method' => $method,
@@ -127,24 +122,25 @@ class Payscrypt_API_Handler
 
         $args['body'] = json_encode($params);
 
-        self::log("create_order request body: " . print_r($params, true));
+        self::log("create_invoice request: " . print_r($args, true));
 
         $response = wp_remote_request(esc_url_raw($url), $args);
         if (is_wp_error($response)) {
-            self::log('WP response error(create order): ' . $response->get_error_message(), "error");
+            self::log('WP response error(create_invoice): ' . $response->get_error_message(), "error");
+
             return array(false, $response->get_error_message());
         } else {
             $code = $response['response']['code'];
 
             // Success
             if ($code == 200) {
-                self::log("create_order response body: " . print_r($response["body"], true));
+                self::log("create_invoice response: " . print_r($response, true));
 
                 $result = json_decode($response['body'], true);
                 return array(true, $result);
             } else {
                 // Error info is in the headers
-                self::log('create_order error, response code: ' . $code, "error");
+                self::log('create_invoice error, response code: ' . $code, "error");
 
                 return array(false, $code);
             }
@@ -153,13 +149,13 @@ class Payscrypt_API_Handler
 
 
     /**
-     * Get Order detail from Payscrypt
+     * Get Invoice detail from Payscrypt
      *
      * @param array $params
      * @param string $method
      * @return array
      */
-    public static function get_order($params = array(), $method = 'POST')
+    public static function get_invoice($params = array(), $method = 'POST')
     {
         $args = array(
             'method' => $method,
@@ -168,28 +164,29 @@ class Payscrypt_API_Handler
             )
         );
 
-        $url = self::$api_endpoint . self::$get_order_api_url;
+        $url = self::$api_endpoint . self::$get_invoice_api_url;
 
         $args['body'] = json_encode($params);
 
-        self::log('get_order request body: ' . print_r($params, true));
+        self::log('get_invoice request: ' . print_r($args, true));
 
         $response = wp_remote_request(esc_url_raw($url), $args);
         if (is_wp_error($response)) {
-            self::log('WP response error(get order): ' . $response->get_error_message(), "error");
+            self::log('WP response error(get_invoice): ' . $response->get_error_message(), "error");
+
             return array(false, $response->get_error_message());
         } else {
             $code = $response['response']['code'];
 
             // Success
             if ($code == 200) {
-                self::log("get_order response body: " . print_r($response["body"], true));
+                self::log("get_invoice response: " . print_r($response, true));
 
                 $result = json_decode($response['body'], true);
                 return array(true, $result);
             } else {
                 // 404 not found
-                self::log('get_order error, response code: ' . $code);
+                self::log('get_invoice error, response code: ' . $code);
 
                 return array(false, $code);
             }
