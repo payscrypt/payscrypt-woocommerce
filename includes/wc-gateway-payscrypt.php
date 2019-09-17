@@ -171,7 +171,7 @@ class WC_Gateway_Payscrypt extends WC_Payment_Gateway
 
         return array(
             'result' => 'success',
-            'redirect' => $charge["redirect_url"],
+            'redirect' => $charge["payment_url"],
         );
     }
 
@@ -220,7 +220,7 @@ class WC_Gateway_Payscrypt extends WC_Payment_Gateway
                 self::log('Payscrypt can not find order, payscrpyt_invoice_id: ' . $payscrpyt_invoice_id);
             }
 
-            $new_status = $result[1]["order"]["status"];
+            $new_status = $result[1]["invoice"]["status"];
 
             $this->_update_order_status(wc_get_order(intval($order_id)), $new_status);
 

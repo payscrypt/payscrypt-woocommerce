@@ -37,7 +37,7 @@ class Payscrypt_API_Handler
     /**
      * @var string Payscrypt Get Invoice API url
      */
-    public static $get_invoice_api_url = "/payment/v1/invoice/{id}";
+    public static $get_invoice_api_url = "/payment/v1/invoice/";
 
     /**
      * @var string Payscrypt API key.
@@ -77,7 +77,7 @@ class Payscrypt_API_Handler
         $args = array(
             "merchant_invoice_id" => $invoice_id . "", // merchant_invoice_id: string
             "wallet_id" => self::$wallet_id, // wallet_id: int
-            "callback_url" => $redirect, // callback_url: string
+            "redirect_url" => $redirect, // callback_url: string
             "description" => $description, // description: string
             "asset" => $asset // asset: string
         );
@@ -155,7 +155,7 @@ class Payscrypt_API_Handler
      * @param string $method
      * @return array
      */
-    public static function get_invoice($params = array(), $method = 'POST')
+    public static function get_invoice($params = array(), $method = 'GET')
     {
         $args = array(
             'method' => $method,
@@ -164,9 +164,9 @@ class Payscrypt_API_Handler
             )
         );
 
-        $url = self::$api_endpoint . self::$get_invoice_api_url;
+        $url = self::$api_endpoint . self::$get_invoice_api_url . '/' . $params['id'];
 
-        $args['body'] = json_encode($params);
+        //$args['body'] = json_encode($params);
 
         self::log('get_invoice request: ' . print_r($args, true));
 
